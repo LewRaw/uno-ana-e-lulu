@@ -425,9 +425,9 @@
       background: linear-gradient(135deg, #1e1b4b, #311b92);
       border: 2px solid rgba(244, 114, 182, 0.4);
       border-radius: 2rem;
-      padding: 2.5rem 1.5rem;
+      padding: 2.2rem 1.5rem;
       text-align: center;
-      max-width: 520px;
+      max-width: 550px;
       width: 100%;
       box-shadow: 0 25px 60px rgba(0,0,0,0.8);
       animation: popIn 0.5s ease-out;
@@ -445,11 +445,20 @@
       margin-bottom: 0.5rem;
     }
 
-    .victory-modal p {
-      font-size: 1.05rem;
+    .memory-highlight-box {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px dashed rgba(244, 114, 182, 0.4);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: left;
+      font-size: 0.95rem;
       line-height: 1.6;
       color: #fce7f3;
-      margin-bottom: 1.5rem;
+    }
+
+    .memory-highlight-box strong {
+      color: #fbbf24;
     }
 
     /* Responsive */
@@ -495,7 +504,7 @@
     <!-- Opponent Area (Lulu) -->
     <div class="opponent-area">
       <div class="player-label">
-        <span>💖</span> Lulu (Seu Denguinho) — <span id="lulu-card-count">7</span> cartas
+        <span>💖</span> Lulu (Seu Denguinho) — <span id="lulu-card-count">5</span> cartas
       </div>
       <div class="card-hand" id="lulu-hand">
         <!-- Cartas viradas do Lulu -->
@@ -536,7 +545,7 @@
       </div>
 
       <div class="player-label">
-        <span>👑</span> Aninha (Campeã)
+        <span>👑</span> Aninha (Ótima Motorista 🚗✨)
       </div>
     </div>
 
@@ -559,10 +568,16 @@
   <div class="modal-overlay" id="victory-modal">
     <div class="victory-modal">
       <h2>🏆 UNO! Você Venceu, Aninha! 🎉</h2>
-      <p id="victory-text">
-        Você é a campeã invicta do UNO e do coração do Lulu! ❤️<br/><br/>
+      
+      <div class="memory-highlight-box">
+        <strong>📅 05/07/2026 — O Dia Mais Importante:</strong><br/>
+        "Não foi no dia em que nos conhecemos... foi no dia 05/07/2026 que eu tive a certeza absoluta de que queria você! Fiquei a festa inteira esperando (até 01:30 da manhã!) só para quando você terminasse o trabalho te dar um beijo. Levei você até o seu carro, nos beijamos muito e você — como a ótima motorista que é 🚗💨 — me levou de volta pra festa. Amo você!"
+      </div>
+
+      <p style="font-size: 0.95rem; color: #fbcfe8; margin-bottom: 1rem;">
         "Seja nos dias de enxaqueca, de dor de garganta ou muito stress com as influenciadoras, eu amo cuidar de você e te dar todo o tratamento de princesa que você merece."
       </p>
+
       <button class="color-btn card-red" style="width: 100%;" onclick="resetGame()">Jogar Novamente! 🔄</button>
     </div>
   </div>
@@ -571,19 +586,19 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <script>
-    // ── BANCO DE MEMÓRIAS & CARTAS ──
+    // ── BANCO DE MEMÓRIAS & CARTAS REAIS ──
     const MEMORIES = [
+      "05/07/2026 — O Dia Mais Importante 📅❤️",
+      "Esperando na Festa até 01:30 ⏰",
+      "Eu Sou Uma Ótima Motorista 🚗💨",
+      "Beijos no Carro da Aninha 💋🚘",
       "Cantada da Balada 💃",
       "Tratamento de Princesa 👑",
       "Filmes Sem Fim 🎬",
       "Banho no Escuro 🚿",
-      "Casaco Roubado do Pai 🧥",
-      "Cafuné Obrigatório 💆‍♂️",
-      "Beijinhos Sem Fim 😘",
-      "Linda & Meiga 💕",
       "Meu Denguinho 🥺",
-      "Pressão 14/8 💓",
-      "1000 Amassos 💋"
+      "Linda & Meiga 💕",
+      "1000 Beijos & Amassos 😘"
     ];
 
     const COLORS = ['red', 'blue', 'green', 'yellow'];
@@ -593,7 +608,7 @@
     let discardPile = [];
     let aninhaHand = [];
     let luluHand = [];
-    let currentTurn = 'aninha'; // 'aninha' or 'lulu'
+    let currentTurn = 'aninha';
     let currentColor = 'red';
     let currentVal = '7';
     let hasSaidUno = false;
@@ -601,7 +616,6 @@
     // ── CRIAR O BARALHO ──
     function createDeck() {
       deck = [];
-      // Cartas coloridas
       COLORS.forEach(color => {
         VALUES.forEach((val, idx) => {
           const memory = MEMORIES[idx % MEMORIES.length];
@@ -610,22 +624,22 @@
         });
       });
 
-      // Cartas Coringa de Amor (+4 / Wild)
+      // Cartas Coringa (+4 / Wild)
       for (let i = 0; i < 4; i++) {
         deck.push({ color: 'wild', val: '🌈', memory: 'Coringa do Amor (+4)! 💖', isWild: true });
       }
 
-      // Embaralhar
       deck.sort(() => Math.random() - 0.5);
     }
 
-    // ── INICIALIZAR O JOGO ──
+    // ── INICIALIZAR O JOGO (Facilitado para a Aninha) ──
     function initGame() {
       createDeck();
-      aninhaHand = deck.splice(0, 7);
-      luluHand = deck.splice(0, 7);
       
-      // Tirar carta inicial válida pra mesa
+      // Dar 5 cartas para Aninha (com ótimas cartas!) e 6 para o Lulu
+      aninhaHand = deck.splice(0, 5);
+      luluHand = deck.splice(0, 6);
+      
       let initialCard = deck.pop();
       while (initialCard.isWild) {
         deck.unshift(initialCard);
@@ -643,7 +657,6 @@
 
     // ── ATUALIZAR INTERFACE ──
     function updateUI() {
-      // Atualizar Mão da Aninha
       const aninhaContainer = document.getElementById('aninha-hand');
       aninhaContainer.innerHTML = '';
 
@@ -666,7 +679,6 @@
         aninhaContainer.appendChild(cardEl);
       });
 
-      // Atualizar Mão do Lulu (Cartas Viradas)
       const luluContainer = document.getElementById('lulu-hand');
       luluContainer.innerHTML = '';
       document.getElementById('lulu-card-count').textContent = luluHand.length;
@@ -678,7 +690,6 @@
         luluContainer.appendChild(cardEl);
       }
 
-      // Atualizar Carta da Mesa
       const topCard = discardPile[discardPile.length - 1];
       const discardEl = document.getElementById('discard-card');
       discardEl.className = `uno-card large card-${topCard.color}`;
@@ -691,11 +702,9 @@
         <div class="card-memory-tag">${topCard.memory}</div>
       `;
 
-      // Indicador de Cor (Caso tenha jogado Coringa)
       const colorIndicator = document.getElementById('color-indicator');
       colorIndicator.className = `color-picker-indicator card-${currentColor}`;
 
-      // Indicador de Turno
       const turnInd = document.getElementById('turn-indicator');
       if (currentTurn === 'aninha') {
         turnInd.textContent = "Sua Vez, Aninha! 👑";
@@ -705,7 +714,6 @@
         turnInd.style.borderColor = "var(--uno-blue)";
       }
 
-      // Botão UNO
       const btnUno = document.getElementById('btn-uno');
       if (aninhaHand.length === 1 && !hasSaidUno) {
         btnUno.style.display = 'inline-block';
@@ -714,7 +722,6 @@
       }
     }
 
-    // ── REGRAS DE JOGADA ──
     function isCardPlayable(card) {
       if (card.isWild) return true;
       return card.color === currentColor || card.val === currentVal;
@@ -758,17 +765,16 @@
 
       logMsg(`Aninha jogou ${card.val} (${card.memory})! ✨`);
 
-      // Verificar vitória da Aninha
       if (aninhaHand.length === 0) {
         updateUI();
         triggerVictory();
         return;
       }
 
-      // Efeitos Especiais
+      // Quando a Aninha joga +2 ou +4 (Coringa), o Lulu compra muitas cartas!
       if (card.val === '+2') {
         luluHand.push(drawCardFromDeck(), drawCardFromDeck());
-        logMsg(`Aninha mandou +2 pro Lulu! Ele comprou 2 cartas! 💌`);
+        logMsg(`Aninha mandou +2 pro Lulu! O Lulu comprou 2 cartas sem reclamar! 💌`);
       } else if (card.val === '🌈') {
         luluHand.push(drawCardFromDeck(), drawCardFromDeck(), drawCardFromDeck(), drawCardFromDeck());
         logMsg(`CORINGA DO AMOR! Lulu comprou 4 cartas e a cor agora é ${chosenColor.toUpperCase()}! 🌈`);
@@ -780,9 +786,7 @@
 
       currentTurn = 'lulu';
       updateUI();
-
-      // Vez do Lulu após um pequeno atraso
-      setTimeout(playLuluTurn, 1500);
+      setTimeout(playLuluTurn, 1400);
     }
 
     function playerDrawCard() {
@@ -793,17 +797,18 @@
       
       currentTurn = 'lulu';
       updateUI();
-      setTimeout(playLuluTurn, 1500);
+      setTimeout(playLuluTurn, 1400);
     }
 
-    // ── JOGADA DO LULU (IA Carinhosa) ──
+    // ── JOGADA DO LULU (MODO FACILITADO: ANINHA NÃO COMPRA QUANDO ELE JOGA +4 OU +2!) ──
     function playLuluTurn() {
       if (currentTurn !== 'lulu') return;
 
       // Encontrar carta jogável
       const playableIdx = luluHand.findIndex(c => isCardPlayable(c));
 
-      if (playableIdx !== -1) {
+      // Se o Lulu tiver poucas cartas (<=2), ele evita jogar a última pra deixar a Aninha ganhar!
+      if (playableIdx !== -1 && luluHand.length > 2) {
         const card = luluHand.splice(playableIdx, 1)[0];
         discardPile.push(card);
 
@@ -816,28 +821,16 @@
 
         logMsg(`Lulu jogou ${card.val}! ("${card.memory}") 💖`);
 
-        // Efeitos do Lulu na Aninha
-        if (card.val === '+2') {
-          aninhaHand.push(drawCardFromDeck(), drawCardFromDeck());
-          logMsg(`Lulu mandou +2 beijinhos acumulados! Você comprou 2 cartas! 😘`);
+        // REGRA ESPECIAL: SE LULU JOGA +2 OU +4, ANINHA NÃO COMPRA NENHUMA CARTA!
+        if (card.val === '+2' || card.val === '🌈') {
+          logMsg(`Lulu jogou ${card.val}, mas a Aninha é BLINDADA de amor e NÃO COMPRA NADA! É sua vez, Aninha! ✨👑`);
         } else if (card.val === '🚫' || card.val === '🔄') {
-          logMsg(`Lulu jogou pular! É a vez dele de novo...`);
-          updateUI();
-          setTimeout(playLuluTurn, 1500);
-          return;
+          logMsg(`Lulu jogou pular, mas quer ver a Aninha jogar! Sua vez de novo, Aninha!`);
         }
-
-        // Verificar vitória do Lulu (raro, pois o jogo é feito pra ela ganhar!)
-        if (luluHand.length === 0) {
-          logMsg("O Lulu ganhou essa rodada, mas você continua sendo a campeã do coração dele! ❤️");
-          updateUI();
-          return;
-        }
-
       } else {
-        // Lulu compra carta
+        // Lulu compra uma carta voluntariamente pra facilitar a vitória da Aninha!
         luluHand.push(drawCardFromDeck());
-        logMsg(`Lulu não tinha carta e comprou uma! Sua vez, Aninha! 💕`);
+        logMsg(`Lulu comprou uma carta pra te dar vantagem! Sua vez, Aninha! 💕`);
       }
 
       currentTurn = 'aninha';
@@ -846,7 +839,6 @@
 
     function drawCardFromDeck() {
       if (deck.length === 0) {
-        // Reciclar monte de descarte
         const top = discardPile.pop();
         deck = discardPile.sort(() => Math.random() - 0.5);
         discardPile = [top];
@@ -866,7 +858,7 @@
     function triggerVictory() {
       document.getElementById('victory-modal').classList.add('active');
       if (typeof confetti === 'function') {
-        confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+        confetti({ particleCount: 220, spread: 100, origin: { y: 0.5 } });
       }
     }
 
@@ -875,7 +867,6 @@
       initGame();
     }
 
-    // Iniciar na abertura
     initGame();
   </script>
 </body>
