@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>UNO do Amor — Aninha & Lulu 🎴❤️</title>
   <meta name="description" content="Um jogo de UNO especial e personalizado criado pelo Lulu para a Aninha, cheio de memórias e momentos juntos!" />
 
@@ -30,6 +30,7 @@
       --uno-wild: #a855f7;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --shield-color: #f472b6;
     }
 
     body {
@@ -41,138 +42,224 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem;
+      padding: 0.5rem; /* Menos padding para celular */
       overflow-x: hidden;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Ambient Glow */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 150vw;
+      height: 150vh;
+      background: radial-gradient(circle, rgba(239,68,68,0.05) 0%, transparent 60%);
+      transform: translate(-50%, -50%);
+      z-index: -1;
+      pointer-events: none;
     }
 
     /* Top Bar / Header */
     .header {
       width: 100%;
-      max-width: 900px;
+      max-width: 600px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.5rem 1rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 0.8rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 1rem;
       backdrop-filter: blur(12px);
       margin-bottom: 0.5rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
     .header-title {
       font-family: 'Fredoka', cursive;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: 700;
       background: linear-gradient(135deg, #f43f5e, #fbbf24);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.3rem;
     }
 
     .turn-indicator {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 700;
-      padding: 0.4rem 1rem;
+      padding: 0.3rem 0.8rem;
       border-radius: 9999px;
       background: rgba(239, 68, 68, 0.2);
       border: 1px solid var(--uno-red);
       color: #fca5a5;
       animation: pulse 1.5s infinite alternate;
+      white-space: nowrap;
     }
 
     @keyframes pulse {
-      0% { opacity: 0.8; }
-      100% { opacity: 1; transform: scale(1.03); }
+      0% { opacity: 0.8; box-shadow: 0 0 0px transparent; }
+      100% { opacity: 1; transform: scale(1.02); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+    }
+
+    /* Toast / Message Log - Melhorado para mobile */
+    .msg-log-container {
+      width: 100%;
+      max-width: 600px;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      perspective: 1000px;
+    }
+
+    .msg-log {
+      width: 100%;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fbbf24;
+      text-align: center;
+      padding: 0.6rem 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 1rem;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease;
+      transform-origin: top center;
+    }
+
+    .msg-log.pop {
+      animation: msgPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: rgba(244, 114, 182, 0.2);
+      border-color: rgba(244, 114, 182, 0.6);
+      color: #fbcfe8;
+    }
+
+    @keyframes msgPop {
+      0% { transform: scale(0.9) rotateX(20deg); opacity: 0.5; }
+      50% { transform: scale(1.05) rotateX(-10deg); }
+      100% { transform: scale(1) rotateX(0); opacity: 1; }
     }
 
     /* Game Board */
     .game-board {
       width: 100%;
-      max-width: 900px;
+      max-width: 600px;
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      gap: 1rem;
       position: relative;
     }
 
-    /* Opponent Area (Lulu) */
-    .opponent-area {
+    /* Areas */
+    .opponent-area, .player-area {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
+      width: 100%;
     }
+
+    .opponent-area { margin-bottom: 0.5rem; }
+    .player-area { margin-top: auto; }
 
     .player-label {
       font-family: 'Fredoka', cursive;
-      font-size: 1.1rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: #cbd5e1;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+      background: rgba(0,0,0,0.3);
+      padding: 0.2rem 0.8rem;
+      border-radius: 1rem;
+    }
+    
+    .player-area .player-label {
+      margin-top: 0.5rem;
+      margin-bottom: 0;
     }
 
+    /* Hand Containers */
     .card-hand {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: -20px;
-      min-height: 110px;
-      padding: 0.5rem;
+      min-height: 120px;
+      width: 100%;
+      padding: 0 10px;
+      flex-wrap: wrap; /* Permitir quebra se tiver muitas cartas */
+      gap: 5px;
     }
 
-    /* Card Styling */
+    .aninha-hand-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end; /* Alinhar pela base */
+      height: 140px; /* Altura fixa para não pular */
+      width: 100%;
+      position: relative;
+    }
+
+    /* ── Card Styling (Optimized for Mobile) ── */
     .uno-card {
-      width: 80px;
-      height: 120px;
-      border-radius: 10px;
-      border: 3px solid #ffffff;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+      width: 75px;
+      height: 115px;
+      border-radius: 8px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 6px;
-      position: relative;
+      padding: 4px;
+      position: absolute; /* Para fan out */
       cursor: pointer;
-      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, margin 0.3s ease;
       background-size: cover;
-      margin-left: -15px;
+      transform-origin: bottom center;
     }
 
-    .uno-card:first-child {
-      margin-left: 0;
+    /* Opponent cards just stack nicely */
+    #lulu-hand {
+      position: relative;
+      height: 90px;
+    }
+    #lulu-hand .uno-card {
+      width: 60px;
+      height: 90px;
+      border-width: 2px;
     }
 
+    /* Playable effects */
     .uno-card.playable {
-      box-shadow: 0 0 15px #ffffff, 0 8px 20px rgba(0,0,0,0.5);
-      transform: translateY(-12px);
-      z-index: 10;
+      box-shadow: 0 0 12px #ffffff, 0 8px 15px rgba(0,0,0,0.5);
+      border-width: 3px;
     }
 
-    .uno-card.playable:hover {
-      transform: translateY(-20px) scale(1.1);
-      z-index: 20;
+    .uno-card.playable:active {
+      transform: scale(0.95) !important;
     }
 
+    /* Card Back */
     .uno-card.card-back {
       background: linear-gradient(135deg, #1e293b, #0f172a);
       border-color: rgba(255, 255, 255, 0.2);
-      display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .card-back-inner {
-      width: 55px;
-      height: 85px;
+      width: 45px;
+      height: 70px;
       border-radius: 50%;
       background: var(--uno-red);
       transform: rotate(-25deg);
@@ -181,9 +268,9 @@
       justify-content: center;
       font-family: 'Fredoka', cursive;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
 
     /* Card Colors */
@@ -196,7 +283,7 @@
     /* Card Content */
     .card-oval {
       position: absolute;
-      inset: 8px;
+      inset: 6px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.25);
       transform: rotate(-25deg);
@@ -208,19 +295,20 @@
 
     .card-val-center {
       font-family: 'Fredoka', cursive;
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 700;
       color: #ffffff;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+      text-shadow: 2px 2px 3px rgba(0,0,0,0.4);
       transform: rotate(25deg);
     }
 
     .card-val-corner {
       font-family: 'Fredoka', cursive;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 700;
       color: #ffffff;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      line-height: 1;
     }
 
     .card-val-corner.bottom {
@@ -230,18 +318,21 @@
 
     .card-memory-tag {
       position: absolute;
-      bottom: 4px;
+      bottom: 2px;
       left: 0;
       right: 0;
       text-align: center;
-      font-size: 0.55rem;
-      font-weight: 700;
+      font-size: 0.5rem; /* Ajustado para caber */
+      font-weight: 800; /* Mais negrito pra ler no escuro */
       color: #ffffff;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-      padding: 0 2px;
-      white-space: nowrap;
+      text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.9);
+      padding: 0 4px;
+      white-space: normal; /* Permite quebrar linha se for muito longo no mobile */
+      line-height: 1.1;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;  
       overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     /* Center Table (Pile & Deck) */
@@ -249,23 +340,27 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 2.5rem;
+      gap: 1.5rem;
       margin: 1rem 0;
+      height: 160px;
     }
 
     .deck-pile, .discard-pile {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.3rem;
+      position: relative;
     }
 
     .pile-label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      color: var(--text-muted);
+      color: rgba(255,255,255,0.5);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      position: absolute;
+      top: -20px;
     }
 
     /* Large Discard Card Display */
@@ -276,100 +371,110 @@
     .uno-card.large {
       width: 100px;
       height: 150px;
-      margin-left: 0;
+      position: relative; /* override absolute */
     }
 
     .uno-card.large .card-val-center {
-      font-size: 2.8rem;
+      font-size: 3rem;
+    }
+    
+    .uno-card.large .card-memory-tag {
+        font-size: 0.65rem;
     }
 
     .color-picker-indicator {
-      width: 24px;
-      height: 24px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      border: 2px solid #ffffff;
+      border: 3px solid #ffffff;
       position: absolute;
-      top: -8px;
-      right: -8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-    }
-
-    /* Player Area (Aninha) */
-    .player-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
-    }
-
-    .player-controls {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+      top: -10px;
+      right: -10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+      transition: all 0.3s ease;
     }
 
     /* Action Buttons */
+    .player-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      min-height: 40px;
+    }
+
     .btn-uno {
       font-family: 'Fredoka', cursive;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      padding: 0.6rem 1.8rem;
+      padding: 0.5rem 1.5rem;
       background: linear-gradient(135deg, #ef4444, #f43f5e);
       color: #ffffff;
-      border: 3px solid #ffffff;
+      border: 2px solid #ffffff;
       border-radius: 9999px;
       cursor: pointer;
       box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-      animation: bounce 0.6s infinite alternate;
+      animation: bounce 0.6s infinite alternate, glowRed 1s infinite alternate;
       display: none;
+      z-index: 50;
     }
 
-    @keyframes bounce {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.1); }
+    @keyframes glowRed {
+      from { box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
+      to { box-shadow: 0 0 25px rgba(239, 68, 68, 1), 0 0 10px #fff; }
     }
 
     .btn-draw {
       font-family: 'Fredoka', cursive;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
-      padding: 0.5rem 1.2rem;
+      padding: 0.5rem 1rem;
       background: rgba(255, 255, 255, 0.1);
-      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       color: #ffffff;
       border-radius: 9999px;
       cursor: pointer;
       transition: all 0.2s ease;
-    }
-
-    .btn-draw:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    /* Toast / Message Log */
-    .msg-log {
-      min-height: 42px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fbbf24;
-      text-align: center;
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 0.4rem 1rem;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 9999px;
-      backdrop-filter: blur(8px);
+      gap: 0.3rem;
+    }
+
+    .btn-draw:active {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(0.95);
+    }
+
+    /* Shield Animation overlay for Aninha */
+    .shield-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      box-shadow: inset 0 0 20px var(--shield-color), 0 0 30px var(--shield-color);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .shield-active {
+      animation: shieldPulse 1.5s ease-out;
+    }
+
+    @keyframes shieldPulse {
+      0% { opacity: 0; transform: scale(1); }
+      30% { opacity: 1; transform: scale(1.1); box-shadow: inset 0 0 30px var(--shield-color), 0 0 50px var(--shield-color); }
+      100% { opacity: 0; transform: scale(1); }
     }
 
     /* Color Selection Modal */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(8px);
-      z-index: 100;
+      z-index: 200;
       display: none;
       align-items: center;
       justify-content: center;
@@ -378,106 +483,119 @@
 
     .modal-overlay.active {
       display: flex;
+      animation: fadeInModal 0.3s ease;
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .color-modal {
       background: #1e293b;
       border: 2px solid rgba(255, 255, 255, 0.2);
       border-radius: 1.5rem;
-      padding: 2rem;
+      padding: 1.5rem;
       text-align: center;
-      max-width: 400px;
-      width: 100%;
+      max-width: 90%;
+      width: 320px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     }
 
     .color-modal h3 {
       font-family: 'Fredoka', cursive;
-      font-size: 1.5rem;
-      margin-bottom: 1.2rem;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
       color: #ffffff;
     }
 
     .color-options {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 0.8rem;
     }
 
     .color-btn {
-      padding: 1.2rem;
+      padding: 1rem;
       border-radius: 1rem;
-      border: 3px solid #ffffff;
+      border: 2px solid #ffffff;
       font-family: 'Fredoka', cursive;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #ffffff;
       cursor: pointer;
       transition: transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    .color-btn:hover {
-      transform: scale(1.06);
+    .color-btn:active {
+      transform: scale(0.9);
     }
 
     /* Victory Screen Modal */
     .victory-modal {
       background: linear-gradient(135deg, #1e1b4b, #311b92);
-      border: 2px solid rgba(244, 114, 182, 0.4);
-      border-radius: 2rem;
-      padding: 2.2rem 1.5rem;
+      border: 2px solid rgba(244, 114, 182, 0.6);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
       text-align: center;
-      max-width: 550px;
-      width: 100%;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
-      animation: popIn 0.5s ease-out;
-    }
-
-    @keyframes popIn {
-      0% { transform: scale(0.7); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+      max-width: 95%;
+      width: 400px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.9), 0 0 30px rgba(244, 114, 182, 0.3);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .victory-modal h2 {
       font-family: 'Fredoka', cursive;
-      font-size: 2.2rem;
+      font-size: 1.8rem;
       color: #fbbf24;
       margin-bottom: 0.5rem;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
 
     .memory-highlight-box {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px dashed rgba(244, 114, 182, 0.4);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px dashed rgba(244, 114, 182, 0.5);
       border-radius: 1rem;
       padding: 1rem;
       margin: 1rem 0;
       text-align: left;
-      font-size: 0.95rem;
-      line-height: 1.6;
+      font-size: 0.85rem;
+      line-height: 1.5;
       color: #fce7f3;
+      max-height: 40vh;
+      overflow-y: auto;
     }
 
     .memory-highlight-box strong {
       color: #fbbf24;
+      font-size: 0.95rem;
+      display: block;
+      margin-bottom: 0.3rem;
     }
 
-    /* Responsive */
-    @media (max-width: 600px) {
-      .uno-card {
-        width: 65px;
-        height: 100px;
-        margin-left: -20px;
-      }
-      .uno-card.large {
-        width: 85px;
-        height: 130px;
-      }
-      .card-val-center {
-        font-size: 1.7rem;
-      }
-      .uno-card.large .card-val-center {
-        font-size: 2.2rem;
-      }
+    .victory-msg {
+      font-size: 0.85rem;
+      color: #fbcfe8;
+      margin-bottom: 1rem;
+      font-style: italic;
+    }
+
+    .btn-restart {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, #ef4444, #f43f5e);
+      border: 2px solid #fff;
+      color: #fff;
+      font-family: 'Fredoka', cursive;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .btn-restart:active {
+      transform: scale(0.95);
     }
   </style>
 </head>
@@ -486,7 +604,7 @@
   <!-- Header -->
   <header class="header">
     <div class="header-title">
-      <span>🎴</span> UNO do Amor — Aninha & Lulu
+      <span>🎴</span> UNO do Amor
     </div>
     <div class="turn-indicator" id="turn-indicator">
       Sua Vez, Aninha! 👑
@@ -494,8 +612,10 @@
   </header>
 
   <!-- Message Log -->
-  <div class="msg-log" id="msg-log">
-    Bem-vinda ao UNO do Amor! Jogue uma carta que combine com a cor ou valor! 💕
+  <div class="msg-log-container">
+    <div class="msg-log" id="msg-log">
+      Bem-vinda! Jogue uma carta que combine com a cor ou valor! 💕
+    </div>
   </div>
 
   <!-- Game Board -->
@@ -504,7 +624,7 @@
     <!-- Opponent Area (Lulu) -->
     <div class="opponent-area">
       <div class="player-label">
-        <span>💖</span> Lulu (Seu Denguinho) — <span id="lulu-card-count">5</span> cartas
+        <span>💖</span> Lulu — <span id="lulu-card-count">5</span> cartas
       </div>
       <div class="card-hand" id="lulu-hand">
         <!-- Cartas viradas do Lulu -->
@@ -514,9 +634,9 @@
     <!-- Center Table -->
     <div class="center-table">
       <!-- Deck Pile (Monte de Comprar) -->
-      <div class="deck-pile">
+      <div class="deck-pile" onclick="playerDrawCard()">
         <div class="pile-label">Comprar</div>
-        <div class="uno-card card-back" onclick="playerDrawCard()">
+        <div class="uno-card card-back" style="position: relative; margin:0;">
           <div class="card-back-inner">UNO</div>
         </div>
       </div>
@@ -536,16 +656,18 @@
     <!-- Player Area (Aninha) -->
     <div class="player-area">
       <div class="player-controls">
-        <button class="btn-draw" onclick="playerDrawCard()">➕ Comprar Carta</button>
-        <button class="btn-uno" id="btn-uno" onclick="sayUno()">Gritar UNO! 📣❤️</button>
+        <button class="btn-draw" onclick="playerDrawCard()">➕ Comprar</button>
+        <button class="btn-uno" id="btn-uno" onclick="sayUno()">UNO DO AMOR! 📣</button>
       </div>
 
-      <div class="card-hand" id="aninha-hand">
-        <!-- Cartas da Aninha -->
+      <div class="aninha-hand-container" id="aninha-hand">
+        <!-- Cartas da Aninha em leque -->
       </div>
+      
+      <div class="shield-overlay" id="aninha-shield"></div>
 
       <div class="player-label">
-        <span>👑</span> Aninha (Ótima Motorista 🚗✨)
+        <span>👑</span> Aninha (Ótima Motorista 🚗)
       </div>
     </div>
 
@@ -554,7 +676,7 @@
   <!-- Modal Escolher Cor (Wild Card) -->
   <div class="modal-overlay" id="color-modal">
     <div class="color-modal">
-      <h3>Escolha a Cor do Amor! 🎨✨</h3>
+      <h3>Escolha a Cor! 🎨✨</h3>
       <div class="color-options">
         <button class="color-btn card-red" onclick="selectWildColor('red')">Vermelho ❤️</button>
         <button class="color-btn card-blue" onclick="selectWildColor('blue')">Azul 💙</button>
@@ -567,18 +689,18 @@
   <!-- Modal de Vitória -->
   <div class="modal-overlay" id="victory-modal">
     <div class="victory-modal">
-      <h2>🏆 UNO! Você Venceu, Aninha! 🎉</h2>
+      <h2>🏆 UNO! Campeã! 🎉</h2>
       
       <div class="memory-highlight-box">
-        <strong>📅 05/07/2026 — O Dia Mais Importante:</strong><br/>
+        <strong>📅 05/07/2026 — O Dia Mais Importante</strong>
         "Não foi no dia em que nos conhecemos... foi no dia 05/07/2026 que eu tive a certeza absoluta de que queria você! Fiquei a festa inteira esperando (até 01:30 da manhã!) só para quando você terminasse o trabalho te dar um beijo. Levei você até o seu carro, nos beijamos muito e você — como a ótima motorista que é 🚗💨 — me levou de volta pra festa. Amo você!"
       </div>
 
-      <p style="font-size: 0.95rem; color: #fbcfe8; margin-bottom: 1rem;">
+      <p class="victory-msg">
         "Seja nos dias de enxaqueca, de dor de garganta ou muito stress com as influenciadoras, eu amo cuidar de você e te dar todo o tratamento de princesa que você merece."
       </p>
 
-      <button class="color-btn card-red" style="width: 100%;" onclick="resetGame()">Jogar Novamente! 🔄</button>
+      <button class="btn-restart" onclick="resetGame()">Jogar Novamente! 🔄</button>
     </div>
   </div>
 
@@ -588,21 +710,22 @@
   <script>
     // ── BANCO DE MEMÓRIAS & CARTAS REAIS ──
     const MEMORIES = [
-      "05/07/2026 — O Dia Mais Importante 📅❤️",
-      "Esperando na Festa até 01:30 ⏰",
-      "Eu Sou Uma Ótima Motorista 🚗💨",
-      "Beijos no Carro da Aninha 💋🚘",
+      "05/07/2026 O Dia Importante 📅",
+      "Esperando na Festa ⏰",
+      "Ótima Motorista 🚗",
+      "Beijos no Carro 💋",
       "Cantada da Balada 💃",
-      "Tratamento de Princesa 👑",
+      "Tratamento Princesa 👑",
       "Filmes Sem Fim 🎬",
       "Banho no Escuro 🚿",
       "Meu Denguinho 🥺",
       "Linda & Meiga 💕",
-      "1000 Beijos & Amassos 😘"
+      "1000 Amassos 😘"
     ];
 
     const COLORS = ['red', 'blue', 'green', 'yellow'];
-    const VALUES = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '🚫', '🔄', '+2'];
+    // Ajustado peso das cartas para ter mais números e menos especiais base
+    const VALUES = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '1', '2', '3', '4', '5', '🚫', '🔄', '+2'];
 
     let deck = [];
     let discardPile = [];
@@ -612,36 +735,36 @@
     let currentColor = 'red';
     let currentVal = '7';
     let hasSaidUno = false;
+    let luluMistakeCount = 0; // Para ele errar "misteriosamente" às vezes
 
     // ── CRIAR O BARALHO ──
     function createDeck() {
       deck = [];
       COLORS.forEach(color => {
         VALUES.forEach((val, idx) => {
-          const memory = MEMORIES[idx % MEMORIES.length];
-          deck.push({ color, val, memory, isWild: false });
+          const memory = MEMORIES[Math.floor(Math.random() * MEMORIES.length)];
           deck.push({ color, val, memory, isWild: false });
         });
       });
 
       // Cartas Coringa (+4 / Wild)
-      for (let i = 0; i < 4; i++) {
-        deck.push({ color: 'wild', val: '🌈', memory: 'Coringa do Amor (+4)! 💖', isWild: true });
+      for (let i = 0; i < 6; i++) { // Mais coringas pra bagunçar
+        deck.push({ color: 'wild', val: '🌈', memory: 'Coringa do Amor! 💖', isWild: true });
       }
 
       deck.sort(() => Math.random() - 0.5);
     }
 
-    // ── INICIALIZAR O JOGO (Facilitado para a Aninha) ──
+    // ── INICIALIZAR O JOGO ──
     function initGame() {
       createDeck();
       
-      // Dar 5 cartas para Aninha (com ótimas cartas!) e 6 para o Lulu
+      // Aninha começa com 5 cartas, Lulu com 6
       aninhaHand = deck.splice(0, 5);
       luluHand = deck.splice(0, 6);
       
       let initialCard = deck.pop();
-      while (initialCard.isWild) {
+      while (initialCard.isWild || initialCard.val === '+2' || initialCard.val === '🚫' || initialCard.val === '🔄') {
         deck.unshift(initialCard);
         initialCard = deck.pop();
       }
@@ -650,54 +773,100 @@
       currentVal = initialCard.val;
       currentTurn = 'aninha';
       hasSaidUno = false;
+      luluMistakeCount = 0;
 
       updateUI();
-      logMsg("O jogo começou! Sua vez, Aninha! Escolha uma carta para jogar. 💕");
+      logMsg("Sua vez, Aninha! Jogue para vencer! 💕");
+    }
+
+    // ── DISTRIBUIÇÃO EM LEQUE (Fan Out) ──
+    function fanOutCards(containerId, hand, isAninha) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        const numCards = hand.length;
+        
+        if (numCards === 0) return;
+
+        // Ângulo total do leque depende da quantidade de cartas
+        const maxAngle = Math.min(numCards * 10, 60); 
+        const startAngle = -maxAngle / 2;
+        const angleStep = numCards > 1 ? maxAngle / (numCards - 1) : 0;
+        
+        // Espaçamento horizontal
+        const maxSpread = Math.min(numCards * 30, container.clientWidth - 80);
+        const startX = -maxSpread / 2;
+        const stepX = numCards > 1 ? maxSpread / (numCards - 1) : 0;
+
+        hand.forEach((card, idx) => {
+            const el = document.createElement('div');
+            
+            if (isAninha) {
+                const playable = isCardPlayable(card) && currentTurn === 'aninha';
+                el.className = `uno-card card-${card.color} ${playable ? 'playable' : ''}`;
+                
+                const angle = startAngle + (angleStep * idx);
+                const transX = startX + (stepX * idx);
+                
+                // Base transform
+                el.style.transform = `translateX(${transX}px) rotate(${angle}deg)`;
+                // Guardar transform base para o hover não estragar a rotação se não for jogável
+                el.dataset.baseTransform = `translateX(${transX}px) rotate(${angle}deg)`;
+                el.dataset.playableTransform = `translateX(${transX}px) translateY(-15px) rotate(${angle}deg) scale(1.05)`;
+
+                if(playable){
+                     // CSS handles the hover/playable state translation mostly, but inline styles override.
+                     // We use CSS for hover, so let's keep inline style clean for base position, 
+                     // but adjust playable slightly via CSS.
+                     el.style.transform = `translateX(${transX}px) translateY(-10px) rotate(${angle}deg)`;
+                }
+                
+                // Hover effect with JS to maintain angle
+                el.addEventListener('mouseenter', () => {
+                   if(playable && currentTurn === 'aninha') el.style.transform = el.dataset.playableTransform;
+                });
+                el.addEventListener('mouseleave', () => {
+                    if(playable && currentTurn === 'aninha') el.style.transform = `translateX(${transX}px) translateY(-10px) rotate(${angle}deg)`;
+                    else el.style.transform = el.dataset.baseTransform;
+                });
+
+                el.onclick = () => {
+                    if (playable && currentTurn === 'aninha') {
+                        playAninhaCard(idx);
+                    }
+                };
+
+                el.innerHTML = `
+                <div class="card-val-corner">${card.val}</div>
+                <div class="card-oval"><div class="card-val-center">${card.val}</div></div>
+                <div class="card-val-corner bottom">${card.val}</div>
+                <div class="card-memory-tag">${card.memory}</div>
+                `;
+            } else {
+                // Lulu cards just stack side by side overlapping
+                el.className = 'uno-card card-back';
+                el.style.position = 'absolute';
+                const offset = (idx - (numCards-1)/2) * 15;
+                el.style.transform = `translateX(${offset}px)`;
+                el.innerHTML = `<div class="card-back-inner">UNO</div>`;
+            }
+            container.appendChild(el);
+        });
     }
 
     // ── ATUALIZAR INTERFACE ──
     function updateUI() {
-      const aninhaContainer = document.getElementById('aninha-hand');
-      aninhaContainer.innerHTML = '';
-
-      aninhaHand.forEach((card, idx) => {
-        const playable = isCardPlayable(card) && currentTurn === 'aninha';
-        const cardEl = document.createElement('div');
-        cardEl.className = `uno-card card-${card.color} ${playable ? 'playable' : ''}`;
-        cardEl.onclick = () => {
-          if (playable) playAninhaCard(idx);
-        };
-
-        cardEl.innerHTML = `
-          <div class="card-val-corner">${card.val}</div>
-          <div class="card-oval">
-            <div class="card-val-center">${card.val}</div>
-          </div>
-          <div class="card-val-corner bottom">${card.val}</div>
-          <div class="card-memory-tag">${card.memory}</div>
-        `;
-        aninhaContainer.appendChild(cardEl);
-      });
-
-      const luluContainer = document.getElementById('lulu-hand');
-      luluContainer.innerHTML = '';
+      fanOutCards('aninha-hand', aninhaHand, true);
+      fanOutCards('lulu-hand', luluHand, false);
+      
       document.getElementById('lulu-card-count').textContent = luluHand.length;
-
-      for (let i = 0; i < luluHand.length; i++) {
-        const cardEl = document.createElement('div');
-        cardEl.className = 'uno-card card-back';
-        cardEl.innerHTML = `<div class="card-back-inner">UNO</div>`;
-        luluContainer.appendChild(cardEl);
-      }
 
       const topCard = discardPile[discardPile.length - 1];
       const discardEl = document.getElementById('discard-card');
       discardEl.className = `uno-card large card-${topCard.color}`;
+      // Force repaint to trigger entry animation if we wanted one, but static is fine here
       discardEl.innerHTML = `
         <div class="card-val-corner">${topCard.val}</div>
-        <div class="card-oval">
-          <div class="card-val-center">${topCard.val}</div>
-        </div>
+        <div class="card-oval"><div class="card-val-center">${topCard.val}</div></div>
         <div class="card-val-corner bottom">${topCard.val}</div>
         <div class="card-memory-tag">${topCard.memory}</div>
       `;
@@ -707,16 +876,18 @@
 
       const turnInd = document.getElementById('turn-indicator');
       if (currentTurn === 'aninha') {
-        turnInd.textContent = "Sua Vez, Aninha! 👑";
+        turnInd.innerHTML = "Sua Vez, Aninha! 👑";
         turnInd.style.borderColor = "var(--uno-red)";
+        turnInd.style.color = "#fca5a5";
       } else {
-        turnInd.textContent = "Vez do Lulu... 💖";
+        turnInd.innerHTML = "Lulu pensando... 🤔";
         turnInd.style.borderColor = "var(--uno-blue)";
+        turnInd.style.color = "#93c5fd";
       }
 
       const btnUno = document.getElementById('btn-uno');
       if (aninhaHand.length === 1 && !hasSaidUno) {
-        btnUno.style.display = 'inline-block';
+        btnUno.style.display = 'flex';
       } else {
         btnUno.style.display = 'none';
       }
@@ -727,8 +898,25 @@
       return card.color === currentColor || card.val === currentVal;
     }
 
-    function logMsg(txt) {
-      document.getElementById('msg-log').textContent = txt;
+    // Custom Toast Animation
+    function logMsg(txt, isHighlight = false) {
+      const logEl = document.getElementById('msg-log');
+      logEl.textContent = txt;
+      
+      // Trigger animation by removing and adding class
+      logEl.classList.remove('pop');
+      void logEl.offsetWidth; // trigger reflow
+      if(isHighlight) {
+          logEl.classList.add('pop');
+      }
+    }
+
+    // Trigger Shield visual
+    function activateShield() {
+        const shield = document.getElementById('aninha-shield');
+        shield.classList.remove('shield-active');
+        void shield.offsetWidth;
+        shield.classList.add('shield-active');
     }
 
     // ── JOGADA DA ANINHA ──
@@ -763,74 +951,105 @@
       currentColor = chosenColor;
       currentVal = card.val;
 
-      logMsg(`Aninha jogou ${card.val} (${card.memory})! ✨`);
+      logMsg(`Você jogou ${card.val}! ✨`);
 
       if (aninhaHand.length === 0) {
         updateUI();
-        triggerVictory();
+        setTimeout(triggerVictory, 500);
         return;
       }
 
-      // Quando a Aninha joga +2 ou +4 (Coringa), o Lulu compra muitas cartas!
+      // Quando a Aninha joga +2 ou +4 (Coringa), o Lulu compra
       if (card.val === '+2') {
         luluHand.push(drawCardFromDeck(), drawCardFromDeck());
-        logMsg(`Aninha mandou +2 pro Lulu! O Lulu comprou 2 cartas sem reclamar! 💌`);
+        logMsg(`Você mandou +2! Lulu comprou 2 cartas rindo! 💌`, true);
       } else if (card.val === '🌈') {
         luluHand.push(drawCardFromDeck(), drawCardFromDeck(), drawCardFromDeck(), drawCardFromDeck());
-        logMsg(`CORINGA DO AMOR! Lulu comprou 4 cartas e a cor agora é ${chosenColor.toUpperCase()}! 🌈`);
+        logMsg(`CORINGA! Lulu comprou 4! Cor: ${chosenColor.toUpperCase()}! 🌈`, true);
       } else if (card.val === '🚫' || card.val === '🔄') {
-        logMsg(`Carta especial! Lulu foi pulado! É sua vez de novo, Aninha! 🎉`);
+        logMsg(`Pulou o Lulu! Sua vez de novo! 🎉`, true);
         updateUI();
         return;
       }
 
       currentTurn = 'lulu';
       updateUI();
-      setTimeout(playLuluTurn, 1400);
+      setTimeout(playLuluTurn, 1600); // Demora um pouquinho mais pra parecer que pensou
     }
 
     function playerDrawCard() {
       if (currentTurn !== 'aninha') return;
       const card = drawCardFromDeck();
       aninhaHand.push(card);
-      logMsg(`Aninha comprou uma carta: ${card.val} (${card.memory})!`);
+      logMsg(`Você comprou: ${card.val}!`);
       
       currentTurn = 'lulu';
       updateUI();
-      setTimeout(playLuluTurn, 1400);
+      setTimeout(playLuluTurn, 1200);
     }
 
-    // ── JOGADA DO LULU (MODO FACILITADO: ANINHA NÃO COMPRA QUANDO ELE JOGA +4 OU +2!) ──
+    // ── JOGADA DO LULU (MODO APAIXONADO) ──
     function playLuluTurn() {
       if (currentTurn !== 'lulu') return;
 
-      // Encontrar carta jogável
-      const playableIdx = luluHand.findIndex(c => isCardPlayable(c));
+      let playableCards = luluHand.filter(c => isCardPlayable(c));
 
-      // Se o Lulu tiver poucas cartas (<=2), ele evita jogar a última pra deixar a Aninha ganhar!
-      if (playableIdx !== -1 && luluHand.length > 2) {
-        const card = luluHand.splice(playableIdx, 1)[0];
+      // LULU IA: Ele tenta não ganhar. 
+      // Se ele estiver com 1 carta e tiver carta jogável, ele "esquece" de jogar e compra.
+      if (luluHand.length === 1 && playableCards.length > 0 && Math.random() > 0.1) {
+          luluHand.push(drawCardFromDeck());
+          logMsg(`Lulu se distraiu olhando pra você e comprou uma carta! 😍`, true);
+          currentTurn = 'aninha';
+          updateUI();
+          return;
+      }
+
+      // Se a Aninha estiver quase ganhando (1 carta), ele tenta não jogar pular/inverter
+      if (aninhaHand.length === 1) {
+          playableCards = playableCards.filter(c => c.val !== '🚫' && c.val !== '🔄');
+      }
+
+      if (playableCards.length > 0) {
+        // Escolhe uma carta aleatória entre as jogáveis
+        const cardToPlay = playableCards[Math.floor(Math.random() * playableCards.length)];
+        const actualIdx = luluHand.indexOf(cardToPlay);
+        
+        const card = luluHand.splice(actualIdx, 1)[0];
         discardPile.push(card);
 
         if (card.isWild) {
+          // Lulu escolhe uma cor que a Aninha provavelmente tem (trapaça do bem)
+          // Na dúvida, aleatório.
           currentColor = COLORS[Math.floor(Math.random() * COLORS.length)];
         } else {
           currentColor = card.color;
         }
         currentVal = card.val;
 
-        logMsg(`Lulu jogou ${card.val}! ("${card.memory}") 💖`);
-
-        // REGRA ESPECIAL: SE LULU JOGA +2 OU +4, ANINHA NÃO COMPRA NENHUMA CARTA!
+        // REGRA ESPECIAL: SE LULU JOGA +2 OU +4, ANINHA NÃO COMPRA!
         if (card.val === '+2' || card.val === '🌈') {
-          logMsg(`Lulu jogou ${card.val}, mas a Aninha é BLINDADA de amor e NÃO COMPRA NADA! É sua vez, Aninha! ✨👑`);
+          activateShield();
+          logMsg(`Lulu jogou ${card.val}, mas você é BLINDADA de amor e não compra nada! ✨👑`, true);
         } else if (card.val === '🚫' || card.val === '🔄') {
-          logMsg(`Lulu jogou pular, mas quer ver a Aninha jogar! Sua vez de novo, Aninha!`);
+          logMsg(`Lulu jogou ${card.val}, mas ele quer te ver jogar! Sua vez de novo! 💖`, true);
+        } else {
+           logMsg(`Lulu jogou ${card.val}. Sua vez! 💕`);
         }
+        
+        // Even if he played a skip/reverse, we modified the rules so Aninha always gets to play next
+        // to keep it fast-paced and fun for her.
+
+        if (luluHand.length === 0) {
+            // Em caso raro dele ganhar
+            logMsg("O Lulu 'ganhou', mas quem manda no coração dele é você! ❤️");
+            updateUI();
+            return;
+        }
+
       } else {
-        // Lulu compra uma carta voluntariamente pra facilitar a vitória da Aninha!
+        // Compra carta
         luluHand.push(drawCardFromDeck());
-        logMsg(`Lulu comprou uma carta pra te dar vantagem! Sua vez, Aninha! 💕`);
+        logMsg(`Lulu não tinha carta e comprou! Sua vez! 💕`);
       }
 
       currentTurn = 'aninha';
@@ -847,10 +1066,13 @@
     }
 
     function sayUno() {
-      hasSaidUno = true;
-      logMsg(" Aninha gritou: UNO DO AMOR! 📣❤️✨");
-      if (typeof confetti === 'function') {
-        confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+      if(aninhaHand.length === 1 && !hasSaidUno) {
+          hasSaidUno = true;
+          logMsg("📣 UNO DO AMOR!", true);
+          document.getElementById('btn-uno').style.display = 'none';
+          if (typeof confetti === 'function') {
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, zIndex: 1000 });
+          }
       }
     }
 
@@ -858,7 +1080,29 @@
     function triggerVictory() {
       document.getElementById('victory-modal').classList.add('active');
       if (typeof confetti === 'function') {
-        confetti({ particleCount: 220, spread: 100, origin: { y: 0.5 } });
+        const duration = 3000;
+        const end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#ef4444', '#fbbf24', '#f472b6']
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#ef4444', '#fbbf24', '#f472b6']
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
       }
     }
 
@@ -867,7 +1111,11 @@
       initGame();
     }
 
-    initGame();
+    // Impedir zoom duplo no celular
+    document.addEventListener('dblclick', function(event) {
+        event.preventDefault();
+    }, { passive: false });
+
   </script>
 </body>
 </html>
