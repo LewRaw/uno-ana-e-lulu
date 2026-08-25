@@ -686,6 +686,15 @@
     </div>
   </div>
 
+  <!-- Modal de Diálogo Especial Popup -->
+  <div class="modal-overlay" id="dialog-modal">
+    <div class="victory-modal" style="border-color: rgba(251, 191, 36, 0.8);">
+      <h3 id="dialog-title" style="font-family: 'Fredoka', cursive; font-size: 1.4rem; color: #fbbf24; margin-bottom: 0.8rem;">Mensagem do Amor 💕</h3>
+      <p id="dialog-text" style="font-size: 1rem; color: #f8fafc; margin-bottom: 1.2rem; line-height: 1.5; font-weight: 600;"></p>
+      <button class="btn-restart" id="dialog-btn" onclick="closeDialogModal()" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1e293b;">Continuar ❤️</button>
+    </div>
+  </div>
+
   <!-- Modal de Vitória -->
   <div class="modal-overlay" id="victory-modal">
     <div class="victory-modal">
@@ -693,7 +702,7 @@
       
       <div class="memory-highlight-box">
         <strong>📅 05/07/2026 — O Dia Mais Importante</strong>
-        "Não foi no dia em que nos conhecemos... foi no dia 05/07/2026 que eu tive a certeza absoluta de que queria você! Fiquei a festa inteira esperando (até 01:30 da manhã!) só para quando você terminasse o trabalho te dar um beijo. Levei você até o seu carro, nos beijamos muito e você — como a ótima motorista que é 🚗💨 — me levou de volta pra festa. Amo você!"
+        "Não foi no dia em que nos conhecemos... foi no dia 05/07/2026 que eu tive a certeza absoluta de que queria você! Fiquei a festa inteira esperando (até as 02:53 da manhã!) só para quando você terminasse o trabalho pra beijar a sua boca. Levei você até o seu carro, nos beijamos muito e você — como a ótima motorista que é 🚗💨 — me levou de volta pra festa. Amo você!"
       </div>
 
       <p class="victory-msg">
@@ -988,59 +997,102 @@
       setTimeout(playLuluTurn, 1200);
     }
 
-    // ── JOGADA DO LULU (MODO APAIXONADO) ──
+    // ── GERENCIADOR DE POPUP DE DIÁLOGO ──
+    let dialogCallback = null;
+
+    function showPopup(title, text, callback = null) {
+      document.getElementById('dialog-title').textContent = title;
+      document.getElementById('dialog-text').textContent = text;
+      dialogCallback = callback;
+      document.getElementById('dialog-modal').classList.add('active');
+    }
+
+    function closeDialogModal() {
+      document.getElementById('dialog-modal').classList.remove('active');
+      if (dialogCallback) {
+        const cb = dialogCallback;
+        dialogCallback = null;
+        cb();
+      }
+    }
+
+    // ── JOGADA DO LULU (MODO APAIXONADO & FACILITADOR) ──
     function playLuluTurn() {
       if (currentTurn !== 'lulu') return;
 
       let playableCards = luluHand.filter(c => isCardPlayable(c));
 
-      // LULU IA: Ele tenta não ganhar. 
-      // Se ele estiver com 1 carta e tiver carta jogável, ele "esquece" de jogar e compra.
+      // LULU IA: Se estiver com 1 carta, se distrai de propósito
       if (luluHand.length === 1 && playableCards.length > 0 && Math.random() > 0.1) {
           luluHand.push(drawCardFromDeck());
-          logMsg(`Lulu se distraiu olhando pra você e comprou uma carta! 😍`, true);
-          currentTurn = 'aninha';
-          updateUI();
+          showPopup('Lulu Apaixonado! 😍', 'Lulu se distraiu totalmente admirando a sua beleza e comprou uma carta sem querer!', () => {
+            currentTurn = 'aninha';
+            updateUI();
+          });
           return;
       }
 
-      // Se a Aninha estiver quase ganhando (1 carta), ele tenta não jogar pular/inverter
+      // Se a Aninha estiver quase ganhando (1 carta), ele evita pular/inverter
       if (aninhaHand.length === 1) {
           playableCards = playableCards.filter(c => c.val !== '🚫' && c.val !== '🔄');
       }
 
       if (playableCards.length > 0) {
-        // Escolhe uma carta aleatória entre as jogáveis
-        const cardToPlay = playableCards[Math.floor(Math.random() * playableCards.length)];
-        const actualIdx = luluHand.indexOf(cardToPlay);
+        // Encontrar a cor que a Aninha mais tem na mão para ajudar!
+        const aninhaColors = aninhaHand.map(c => c.color).filter(c => c !== 'wild');
+        const aninhaVals = aninhaHand.map(c => c.val);
         
+        let colorCounts = {};
+        aninhaColors.forEach(c => colorCounts[c] = (colorCounts[c] || 0) + 1);
+        let bestColor = COLORS[0];
+        let maxC = 0;
+        for (let c in colorCounts) {
+          if (colorCounts[c] > maxC) {
+            maxC = colorCounts[c];
+            bestColor = c;
+          }
+        }
+
+        // Tenta com 80% de probabilidade jogar uma carta que a Aninha tenha a cor ou valor!
+        let helpfulCards = playableCards.filter(c => c.isWild || aninhaColors.includes(c.color) || aninhaVals.includes(c.val));
+        
+        let cardToPlay;
+        if (helpfulCards.length > 0 && Math.random() < 0.85) {
+          cardToPlay = helpfulCards[Math.floor(Math.random() * helpfulCards.length)];
+        } else {
+          cardToPlay = playableCards[Math.floor(Math.random() * playableCards.length)];
+        }
+
+        const actualIdx = luluHand.indexOf(cardToPlay);
         const card = luluHand.splice(actualIdx, 1)[0];
         discardPile.push(card);
 
         if (card.isWild) {
-          // Lulu escolhe uma cor que a Aninha provavelmente tem (trapaça do bem)
-          // Na dúvida, aleatório.
-          currentColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+          currentColor = bestColor; // Lulu escolhe a cor que a Aninha MAIS tem!
         } else {
           currentColor = card.color;
         }
         currentVal = card.val;
 
-        // REGRA ESPECIAL: SE LULU JOGA +2 OU +4, ANINHA NÃO COMPRA!
+        // POPUPS DE INTERAÇÃO OBRIGATÓRIA
         if (card.val === '+2' || card.val === '🌈') {
           activateShield();
-          logMsg(`Lulu jogou ${card.val}, mas você é BLINDADA de amor e não compra nada! ✨👑`, true);
+          showPopup('Proteção do Amor! 🛡️❤️', `Lulu jogou ${card.val}, mas você é BLINDADA pelo amor do seu Lulu e não precisa comprar NENHUMA carta!`, () => {
+            currentTurn = 'aninha';
+            updateUI();
+          });
+          return;
         } else if (card.val === '🚫' || card.val === '🔄') {
-          logMsg(`Lulu jogou ${card.val}, mas ele quer te ver jogar! Sua vez de novo! 💖`, true);
+          showPopup('Vez de Novo! 💖', `Lulu jogou ${card.val}, mas ele ama te ver jogar, então é a sua vez novamente!`, () => {
+            currentTurn = 'aninha';
+            updateUI();
+          });
+          return;
         } else {
-           logMsg(`Lulu jogou ${card.val}. Sua vez! 💕`);
+          logMsg(`Lulu jogou ${card.val}. Sua vez! 💕`);
         }
-        
-        // Even if he played a skip/reverse, we modified the rules so Aninha always gets to play next
-        // to keep it fast-paced and fun for her.
 
         if (luluHand.length === 0) {
-            // Em caso raro dele ganhar
             logMsg("O Lulu 'ganhou', mas quem manda no coração dele é você! ❤️");
             updateUI();
             return;
