@@ -459,7 +459,7 @@
       cursor: pointer;
       box-shadow: 0 0 15px rgba(236, 72, 153, 0.6);
       transition: all 0.2s ease;
-      display: flex;
+      display: none; /* Escondido até ser liberado */
       align-items: center;
       gap: 0.3rem;
       animation: pulseKiss 1.5s infinite alternate;
@@ -792,6 +792,9 @@
       deck.sort(() => Math.random() - 0.5);
     }
 
+    let hasUnlockedKisses = false;
+    let luluFirstTurn = true;
+
     // ── INICIALIZAR O JOGO ──
     function initGame() {
       createDeck();
@@ -799,6 +802,11 @@
       // Aninha começa com 5 cartas, Lulu com 6
       aninhaHand = deck.splice(0, 5);
       luluHand = deck.splice(0, 6);
+
+      // Garantir que o Lulu tenha pelo menos 1 carta especial (+2, Coringa, etc.) na primeira mão!
+      if (!luluHand.some(c => c.val === '+2' || c.isWild || c.val === '🚫' || c.val === '🔄')) {
+        luluHand[0] = { color: 'wild', val: '🌈', memory: 'Coringa do Amor! 💖', isWild: true };
+      }
       
       let initialCard = deck.pop();
       while (initialCard.isWild || initialCard.val === '+2' || initialCard.val === '🚫' || initialCard.val === '🔄') {
@@ -811,6 +819,12 @@
       currentTurn = 'aninha';
       hasSaidUno = false;
       luluMistakeCount = 0;
+      hasUnlockedKisses = false;
+      luluFirstTurn = true;
+
+      // Garantir que o botão comece escondido
+      const btnKisses = document.getElementById('btn-kisses');
+      if (btnKisses) btnKisses.style.display = 'none';
 
       updateUI();
       logMsg("Sua vez, Aninha! Jogue para vencer! 💕");
@@ -1037,6 +1051,17 @@
 
     function closeDialogModal() {
       document.getElementById('dialog-modal').classList.remove('active');
+      
+      // Desbloquear o botão de 1000 beijinhos assim que ler a primeira mensagem!
+      if (!hasUnlockedKisses) {
+        hasUnlockedKisses = true;
+        const btnKisses = document.getElementById('btn-kisses');
+        if (btnKisses) {
+          btnKisses.style.display = 'flex';
+          logMsg("🔓 NOVO PODER DESBLOQUEADO: Botão dos 1000 Beijinhos liberado!", true);
+        }
+      }
+
       if (dialogCallback) {
         const cb = dialogCallback;
         dialogCallback = null;
@@ -1081,14 +1106,25 @@
           }
         }
 
-        // Tenta com 80% de probabilidade jogar uma carta que a Aninha tenha a cor ou valor!
-        let helpfulCards = playableCards.filter(c => c.isWild || aninhaColors.includes(c.color) || aninhaVals.includes(c.val));
-        
         let cardToPlay;
-        if (helpfulCards.length > 0 && Math.random() < 0.85) {
-          cardToPlay = helpfulCards[Math.floor(Math.random() * helpfulCards.length)];
-        } else {
-          cardToPlay = playableCards[Math.floor(Math.random() * playableCards.length)];
+
+        // NO 1º TURNO DO LULU: FORÇAR CARTA DE POPUP PARA ELA LER O PRIMEIRO POPUP!
+        if (luluFirstTurn) {
+          luluFirstTurn = false;
+          let specialCard = playableCards.find(c => c.val === '+2' || c.isWild || c.val === '🚫' || c.val === '🔄');
+          if (specialCard) {
+            cardToPlay = specialCard;
+          }
+        }
+
+        if (!cardToPlay) {
+          // Tenta com 85% de probabilidade jogar uma carta que a Aninha tenha a cor ou valor!
+          let helpfulCards = playableCards.filter(c => c.isWild || aninhaColors.includes(c.color) || aninhaVals.includes(c.val));
+          if (helpfulCards.length > 0 && Math.random() < 0.85) {
+            cardToPlay = helpfulCards[Math.floor(Math.random() * helpfulCards.length)];
+          } else {
+            cardToPlay = playableCards[Math.floor(Math.random() * playableCards.length)];
+          }
         }
 
         const actualIdx = luluHand.indexOf(cardToPlay);
