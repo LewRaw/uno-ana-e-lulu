@@ -939,13 +939,17 @@
                     else el.style.transform = el.dataset.baseTransform;
                 });
 
+                let clicked = false;
                 const handlePlay = (e) => {
-                    e.preventDefault();
+                    if (clicked) return;
                     if (playable && currentTurn === 'aninha') {
+                        clicked = true;
                         playAninhaCard(idx);
                     }
                 };
 
+                // No PC, pointerdown dispara no primeiro clique imediatamente sem precisar de duplo clique
+                el.addEventListener('pointerdown', handlePlay);
                 el.onclick = handlePlay;
 
                 el.innerHTML = `
