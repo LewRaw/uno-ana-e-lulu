@@ -245,8 +245,34 @@
       border-width: 3px;
     }
 
+    .uno-card * {
+      pointer-events: none; /* Garante clique perfeito no PC e mobile */
+    }
+
     .uno-card.playable:active {
       transform: scale(0.95) !important;
+    }
+
+    /* Quiz Modal Option Buttons */
+    .quiz-option-btn {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border-radius: 0.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.3;
+    }
+    .quiz-option-btn:hover, .quiz-option-btn:active {
+      background: rgba(236, 72, 153, 0.3);
+      border-color: #ec4899;
+      transform: scale(1.02);
     }
 
     /* Card Back */
@@ -684,7 +710,7 @@
     <div class="player-area">
       <div class="player-controls">
         <button class="btn-draw" onclick="playerDrawCard()">➕ Comprar</button>
-        <button class="btn-kisses" onclick="triggerMilBeijinhos()">💋 1000 Beijinhos!</button>
+        <button class="btn-kisses" id="btn-kisses" onclick="handleKissesButtonClick()">🔒 1000 Beijinhos (Quiz)</button>
         <button class="btn-uno" id="btn-uno" onclick="sayUno()">UNO DO AMOR! 📣</button>
       </div>
 
@@ -710,6 +736,34 @@
         <button class="color-btn card-blue" onclick="selectWildColor('blue')">Azul 💙</button>
         <button class="color-btn card-green" onclick="selectWildColor('green')">Verde 💚</button>
         <button class="color-btn card-yellow" onclick="selectWildColor('yellow')">Amarelo 💛</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Quiz dos 1000 Beijinhos -->
+  <div class="modal-overlay" id="quiz-modal">
+    <div class="victory-modal" style="border-color: #ec4899; max-width: 360px;">
+      <h3 style="font-family: 'Fredoka', cursive; font-size: 1.4rem; color: #f472b6; margin-bottom: 0.5rem;">
+        🔐 Desafio dos 1000 Beijinhos! 💋
+      </h3>
+      <p style="font-size: 0.85rem; color: #f8fafc; margin-bottom: 1rem; line-height: 1.4;">
+        Para desbloquear o Super Poder de fazer o Lulu perder tudo, responda a pergunta secreta:
+      </p>
+      
+      <div style="background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 0.8rem; margin-bottom: 1rem; text-align: left; font-size: 0.85rem; font-weight: 700; color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3);">
+        ❓ "Quando é que a Aninha ganha o combo oficial de Mil Beijinhos do Lulu?"
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+        <button class="quiz-option-btn" onclick="answerQuiz(true)">
+          🛏️ Ao acordar de manhã & maratonando filmes/séries juntinhos na cama! 🎬💋
+        </button>
+        <button class="quiz-option-btn" onclick="answerQuiz(false)">
+          🍽️ Só quando ela lembra de lavar a louça
+        </button>
+        <button class="quiz-option-btn" onclick="answerQuiz(false)">
+          🎂 Apenas uma vez por ano no aniversário dela
+        </button>
       </div>
     </div>
   </div>
@@ -871,20 +925,28 @@
                      el.style.transform = `translateX(${transX}px) translateY(-10px) rotate(${angle}deg)`;
                 }
                 
-                // Hover effect with JS to maintain angle
+                // Elevacao de z-index para garantir clique no PC e mobile
+                el.style.zIndex = idx + 10;
+
+                // Hover effect com elevacao de z-index no PC
                 el.addEventListener('mouseenter', () => {
+                   el.style.zIndex = 100;
                    if(playable && currentTurn === 'aninha') el.style.transform = el.dataset.playableTransform;
                 });
                 el.addEventListener('mouseleave', () => {
+                    el.style.zIndex = idx + 10;
                     if(playable && currentTurn === 'aninha') el.style.transform = `translateX(${transX}px) translateY(-10px) rotate(${angle}deg)`;
                     else el.style.transform = el.dataset.baseTransform;
                 });
 
-                el.onclick = () => {
+                const handlePlay = (e) => {
+                    e.preventDefault();
                     if (playable && currentTurn === 'aninha') {
                         playAninhaCard(idx);
                     }
                 };
+
+                el.onclick = handlePlay;
 
                 el.innerHTML = `
                 <div class="card-val-corner">${card.val}</div>
@@ -1189,6 +1251,52 @@
           if (typeof confetti === 'function') {
             confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, zIndex: 1000 });
           }
+      }
+    }
+
+    let hasPassedQuiz = false;
+
+    function handleKissesButtonClick() {
+      if (!hasPassedQuiz) {
+        openQuizModal();
+      } else {
+        triggerMilBeijinhos();
+      }
+    }
+
+    function openQuizModal() {
+      document.getElementById('quiz-modal').classList.add('active');
+    }
+
+    function answerQuiz(isCorrect) {
+      if (isCorrect) {
+        document.getElementById('quiz-modal').classList.remove('active');
+        hasPassedQuiz = true;
+        
+        const btn = document.getElementById('btn-kisses');
+        if (btn) {
+          btn.innerHTML = '💋 1000 Beijinhos!';
+          btn.style.background = 'linear-gradient(135deg, #ec4899, #f43f5e)';
+        }
+
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, zIndex: 1000 });
+        }
+
+        showPopup(
+          'ACERTOU EM CHEIO! 🎯💋',
+          'Você me conhece perfeitamente! Quando a gente tá acorda de manhã ou maratonando filmes/séries juntinhos na cama, o Lulu NUNCA resiste e enche você de mil beijinhos! 💋✨ O Super Poder dos 1000 Beijinhos foi DESBLOQUEADO!',
+          () => {
+            logMsg("💋 Super Poder Liberado! Clique em 1000 Beijinhos!", true);
+          }
+        );
+      } else {
+        logMsg("Errou! Hahaha tenta de novo, minha gata! 😜", true);
+        const qModal = document.querySelector('#quiz-modal .victory-modal');
+        if (qModal) {
+          qModal.style.transform = 'scale(0.95)';
+          setTimeout(() => qModal.style.transform = 'scale(1)', 200);
+        }
       }
     }
 
